@@ -23,6 +23,20 @@ typedef struct Pixel {
   unsigned char red, green, blue;
 } Pixel;
 
+// Holds information about the header of a ppm file
+typedef struct Header {
+   unsigned char magicNumber;
+   unsigned int width, height, maxColor;
+} Header;
+
+// Function declarations
+Header parseHeader(FILE *);
+void readP3(Pixel *, Header, FILE *);
+void writeP3(Pixel *, Header, FILE *);
+void readP6(Pixel *, Header, FILE *);
+void writeP6(Pixel *, Header, FILE *);
+void skipComments(FILE *);
+
 // (-1, 1)  (1, 1)
 // (-1, -1) (1, -1)
 
@@ -279,6 +293,118 @@ int main(int argc, char *argv[])
 
     glfwTerminate();
     exit(EXIT_SUCCESS);
+}
+
+// Parses the data in the header and moves the position to the
+// beginning of the data.
+Header parseHeader(FILE *fh) {
+  Header h;
+  
+  // Check if there is a magic number
+  if (fgetc(fh) != 'P') {
+    fprintf(stderr, "Error: Malformed input magic number. \n");
+    exit(1);
+  }
+  
+  // Parse magic number
+  fscanf(fh, "%d ", &h.magicNumber);
+  
+  skipComments(fh);
+  
+  // Parse width
+  fscanf(fh, "%d ", &h.width);
+  
+  skipComments(fh);
+  
+  // Parse height
+  fscanf(fh, "%d ", &h.height);
+  
+  skipComments(fh);
+  
+  // Parse maximum color value
+  fscanf(fh, "%d", &h.maxColor);
+  
+  // Skip single whitespace character before data
+  fgetc(fh);
+  
+  // Check if any parsing encountered an error.
+  if (ferror(fh) != 0) {
+     fprintf(stderr, "Error: Unable to read header.");
+     exit(1);
+  }
+   
+  return h;
+}
+
+// Reads P3 data
+void readP3(Pixel *buffer, Header h, FILE *fh) {
+  // Read RGB triples
+  for (int i = 0; i < h.width * h.height; i++) {
+     fscanf(fh, "%d %d %d", &buffer[i].red, &buffer[i].green, &buffer[i].blue);
+  }
+  if (ferror(fh) != 0) {
+     fprintf(stderr, "Error: Unable to read data.");
+     exit(1);
+  }
+}
+
+// Writes P3 data
+void writeP3(Pixel *buffer, Header h, FILE *fh) {
+  // Write the header
+  fprintf(fh, "P%d\n%d %d\n%d\n", h.magicNumber, h.width, h.height, h.maxColor);
+  // Write the ascii data
+  for (int i = 0; i < h.width * h.height; i++) {
+     fprintf(fh, "%d\n%d\n%d\n", buffer[i].red, buffer[i].green, buffer[i].blue);
+  }
+}
+
+// Reads P6 data
+void readP6(Pixel *buffer, Header h, FILE *fh) {
+  // Read RGB triples
+  for (int i = 0; i < h.width * h.height; i++) {
+     buffer[i].red = fgetc(fh);
+     buffer[i].green = fgetc(fh);
+     buffer[i].blue = fgetc(fh);
+  }
+  if (ferror(fh) != 0) {
+     fprintf(stderr, "Error: Unable to read data.");
+     exit(1);
+  }
+}
+
+// Writes P6 data
+void writeP6(Pixel *buffer, Header h, FILE *fh) {
+  // Write header
+  fprintf(fh, "P%d\n%d %d\n%d\n", h.magicNumber, h.width, h.height, h.maxColor);
+  // Write binary data
+  for (int i = 0; i < h.width * h.height; i++) {
+     fputc(buffer[i].red, fh);
+     fputc(buffer[i].green, fh);
+     fputc(buffer[i].blue, fh);
+  }
+}
+
+// Skips lines that begin with '#'
+void skipComments(FILE *fh) {
+  char c = fgetc(fh);
+  // Skip all comment lines
+  while (c == '#') {
+    // Go to the end of the line
+    do {
+      c = fgetc(fh);
+      // Comments are potentially not closed
+      if (c == EOF) {
+        fprintf(stderr, "Error: Reached EOF when parsing comment.");
+        exit(1);
+      }
+    } while (c != '\n');
+    
+    // Get the next character to test for a comment line
+    c = fgetc(fh);
+  }
+  
+  // The standard library does not have a peek so we get and unget instead.
+  ungetc(c, fh);
 }
 
 //! [code]
