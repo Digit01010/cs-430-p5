@@ -19,7 +19,7 @@ typedef struct {
 } Vertex;
 
 // Holds an rgb triple of a pixel
-typedef struct Pixel {
+typedef struct {
   unsigned char red, green, blue;
 } Pixel;
 
@@ -45,14 +45,52 @@ void skipComments(FILE *);
   {{-1, -1},  {0, 0}},
 };*/
 
-Vertex vertexes[] = {
+/*Vertex vertexes[] = {
   {{1, -1}, {0.99999, 0}},
   {{1, 1},  {0.99999, 0.99999}},
   {{-1, 1}, {0, 0.99999}},
   {{-1, 1}, {0, 0.99999}},
-  {{-1, -1},  {0, 0}},
+  {{-1, -1}, {0, 0}},
   {{1, -1}, {0.99999, 0}}
+};*/
+
+/*Vertex vertexes[] = {
+  {{1, -1}, {0, 0.99999}},
+  {{1, 1},  {0, 0}},
+  {{-1, 1}, {0.99999, 0}},
+  {{-1, 1}, {0.99999, 0}},
+  {{-1, -1},{0.99999, 0.99999}},
+  {{1, -1}, {0, 0.99999}}
+};*/
+
+Vertex vertexes[] = {
+  {{-1, -1}, {0, 1}},
+  {{-1, 1},  {0, 0}},
+  {{1, 1}, {1, 0}},
+  {{1, 1}, {1, 0}},
+  {{1, -1},{1, 1}},
+  {{-1, -1}, {0, 1}}
 };
+
+/*Vertex vertexes[] = {
+  {{1, -1}, {1, 0}},
+  {{1, 1},  {1, 1}},
+  {{-1, 1}, {0, 1}},
+  {{-1, 1}, {0, 1}},
+  {{-1, -1},{0, 0}},
+  {{1, -1}, {1, 0}}
+};*/
+
+
+/*Vertex vertexes[] = {
+  {{1, -1}, {1, 0}},
+  {{-1, 1}, {0, 1}},
+  {{1, 1},  {1, 1}},
+
+  {{-1, 1}, {0, 1}},
+  {{1, -1}, {1, 0}},
+  {{-1, -1},{0, 0}}
+};*/
 
 
 const GLubyte indexes[] = {
@@ -72,7 +110,7 @@ static const char* vertex_shader_text =
 "}\n";
 
 static const char* fragment_shader_text =
-"varying lowp vec2 TexCoordOut;\n"
+"varying highp vec2 TexCoordOut;\n"
 "uniform sampler2D Texture;\n"
 "void main()\n"
 "{\n"
@@ -132,26 +170,59 @@ void glCompileShaderOrDie(GLuint shader) {
   255, 0, 255, 255
 };*/
 
-unsigned char image[] = {
+/*unsigned char image[] = {
   255, 0, 0,
   255, 0, 0,
   255, 0, 0,
-  255, 0, 0,
+  255, 255, 0,
 
   0, 255, 0,
   0, 255, 0,
-  0, 255, 0,
+  255, 255, 0,
   0, 255, 0,
 
   0, 0, 255,
-  0, 0, 255,
+  255, 255, 0,
   0, 0, 255,
   0, 0, 255,
 
-  255, 0, 255,
+  255, 255, 0,
   255, 0, 255,
   255, 0, 255,
   255, 0, 255
+};*/
+
+unsigned char image[] = {
+255, 0, 0,
+255, 0, 0,
+255, 0, 0,
+255, 0, 0,
+255, 0, 0,
+
+255, 255, 255,
+255, 255, 255,
+255, 0, 0,
+255, 255, 255,
+255, 255, 255,
+
+255, 255, 255,
+255, 255, 255,
+255, 0, 0,
+255, 255, 255,
+255, 255, 255,
+
+255, 0, 0,
+255, 255, 255,
+255, 0, 0,
+255, 255, 255,
+255, 255, 255,
+
+255, 0, 0,
+255, 0, 0,
+255, 0, 0,
+255, 255, 255,
+255, 255, 255,
+0, 255, 0
 };
 
 int main(int argc, char *argv[])
@@ -168,7 +239,7 @@ int main(int argc, char *argv[])
     fprintf(stderr, "Error: Unable to open input file.");
     return 1;
   }
-  
+    
   // Get header information from input file
   Header inHeader = parseHeader(input);
   
@@ -189,6 +260,19 @@ int main(int argc, char *argv[])
     fprintf(stderr, "Error: Input magic number not supported.\n");
   }
     fclose(input);
+
+    //for (int i=0; i<inHeader.width * inHeader.height;i++) {
+	//  printf("%d, %d, %d \n", buffer[i].red, buffer[i].green, buffer[i].blue);
+	//}
+
+    unsigned char *raw_data = malloc(sizeof(unsigned char)*4*inHeader.width * inHeader.height);
+    for (int i=0; i<inHeader.width * inHeader.height;i++) {
+	  raw_data[i*4] = buffer[i].red;
+	  raw_data[i*4+1] = buffer[i].green;
+	  raw_data[i*4+2] = buffer[i].blue;
+	  raw_data[i*4+3] = 255;
+	  //printf("%d, %d, %d \n", buffer[i].red, buffer[i].green, buffer[i].blue);
+	}
 
 
     GLFWwindow* window;
@@ -281,8 +365,8 @@ int main(int argc, char *argv[])
                           sizeof(Vertex),
 			  (void*) (sizeof(float) * 2));
     
-    int image_width = 4;
-    int image_height = 4;
+    int image_width = 5;
+    int image_height = 5;
 
     GLuint texID;
     glGenTextures(1, &texID);
@@ -290,8 +374,10 @@ int main(int argc, char *argv[])
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width, image_height, 0, GL_RGB, 
-		 GL_UNSIGNED_BYTE, image);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width, image_height, 0, GL_RGB, 
+	//	 GL_UNSIGNED_BYTE, image);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, inHeader.width, inHeader.height, 0, GL_RGBA, 
+		 GL_UNSIGNED_BYTE, raw_data);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texID);
@@ -310,7 +396,7 @@ int main(int argc, char *argv[])
         glClear(GL_COLOR_BUFFER_BIT);
 
         mat4x4_identity(m);
-        //mat4x4_rotate_Z(m, m, (float) glfwGetTime());
+        mat4x4_rotate_Z(m, m, (float) glfwGetTime());
         mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
         mat4x4_mul(mvp, p, m);
 
