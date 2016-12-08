@@ -32,9 +32,7 @@ typedef struct Header {
 // Function declarations
 Header parseHeader(FILE *);
 void readP3(Pixel *, Header, FILE *);
-void writeP3(Pixel *, Header, FILE *);
 void readP6(Pixel *, Header, FILE *);
-void writeP6(Pixel *, Header, FILE *);
 void skipComments(FILE *);
 
 // (-1, 1)  (1, 1)
@@ -158,6 +156,41 @@ unsigned char image[] = {
 
 int main(int argc, char *argv[])
 {
+
+   if (argc != 2) {
+     fprintf(stderr, "Error: Incorrect number of arguments.\n");
+     printf("Usage: ezview inputFile\n");
+     return(1);
+   }
+   
+  FILE* input = fopen(argv[1], "r");
+  if (input == NULL) {
+    fprintf(stderr, "Error: Unable to open input file.");
+    return 1;
+  }
+  
+  // Get header information from input file
+  Header inHeader = parseHeader(input);
+  
+  if (inHeader.maxColor > 255) {
+    fprintf(stderr, "Error: Maximum color greater than 255 not supported.\n");
+    return 1;
+  }
+  
+  // Create buffer and read data from input using appropriate function.
+  Pixel *buffer = malloc(sizeof(Pixel) * inHeader.width * inHeader.height);
+  if (inHeader.magicNumber == 3) {
+    readP3(buffer, inHeader, input);
+  }
+  else if (inHeader.magicNumber == 6) {
+    readP6(buffer, inHeader, input);
+  }
+  else {
+    fprintf(stderr, "Error: Input magic number not supported.\n");
+  }
+    fclose(input);
+
+
     GLFWwindow* window;
     GLuint vertex_buffer, index_buffer, vertex_shader, fragment_shader, program;
     GLint mvp_location, vpos_location, vcol_location;
@@ -348,15 +381,6 @@ void readP3(Pixel *buffer, Header h, FILE *fh) {
   }
 }
 
-// Writes P3 data
-void writeP3(Pixel *buffer, Header h, FILE *fh) {
-  // Write the header
-  fprintf(fh, "P%d\n%d %d\n%d\n", h.magicNumber, h.width, h.height, h.maxColor);
-  // Write the ascii data
-  for (int i = 0; i < h.width * h.height; i++) {
-     fprintf(fh, "%d\n%d\n%d\n", buffer[i].red, buffer[i].green, buffer[i].blue);
-  }
-}
 
 // Reads P6 data
 void readP6(Pixel *buffer, Header h, FILE *fh) {
@@ -372,17 +396,6 @@ void readP6(Pixel *buffer, Header h, FILE *fh) {
   }
 }
 
-// Writes P6 data
-void writeP6(Pixel *buffer, Header h, FILE *fh) {
-  // Write header
-  fprintf(fh, "P%d\n%d %d\n%d\n", h.magicNumber, h.width, h.height, h.maxColor);
-  // Write binary data
-  for (int i = 0; i < h.width * h.height; i++) {
-     fputc(buffer[i].red, fh);
-     fputc(buffer[i].green, fh);
-     fputc(buffer[i].blue, fh);
-  }
-}
 
 // Skips lines that begin with '#'
 void skipComments(FILE *fh) {
