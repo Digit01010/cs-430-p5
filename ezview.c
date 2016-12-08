@@ -18,6 +18,11 @@ typedef struct {
   float TexCoord[2];
 } Vertex;
 
+// Holds an rgb triple of a pixel
+typedef struct Pixel {
+  unsigned char red, green, blue;
+} Pixel;
+
 // (-1, 1)  (1, 1)
 // (-1, -1) (1, -1)
 
@@ -93,7 +98,7 @@ void glCompileShaderOrDie(GLuint shader) {
 }
 
 // 4 x 4 image..
-unsigned char image[] = {
+/*unsigned char image[] = {
   255, 0, 0, 255,
   255, 0, 0, 255,
   255, 0, 0, 255,
@@ -113,6 +118,28 @@ unsigned char image[] = {
   255, 0, 255, 255,
   255, 0, 255, 255,
   255, 0, 255, 255
+};*/
+
+unsigned char image[] = {
+  255, 0, 0,
+  255, 0, 0,
+  255, 0, 0,
+  255, 0, 0,
+
+  0, 255, 0,
+  0, 255, 0,
+  0, 255, 0,
+  0, 255, 0,
+
+  0, 0, 255,
+  0, 0, 255,
+  0, 0, 255,
+  0, 0, 255,
+
+  255, 0, 255,
+  255, 0, 255,
+  255, 0, 255,
+  255, 0, 255
 };
 
 int main(int argc, char *argv[])
@@ -216,7 +243,7 @@ int main(int argc, char *argv[])
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, 
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width, image_height, 0, GL_RGB, 
 		 GL_UNSIGNED_BYTE, image);
 
     glActiveTexture(GL_TEXTURE0);
