@@ -21,10 +21,26 @@ typedef struct {
 // (-1, 1)  (1, 1)
 // (-1, -1) (1, -1)
 
+/*Vertex vertexes[] = {
+  {{1, -1}, {0.99999, 0}},
+  {{1, 1},  {0.99999, 0.99999}},
+  {{-1, 1}, {0, 0.99999}},
+  {{-1, -1},  {0, 0}},
+};*/
+
 Vertex vertexes[] = {
   {{1, -1}, {0.99999, 0}},
   {{1, 1},  {0.99999, 0.99999}},
-  {{-1, 1}, {0, 0.99999}}
+  {{-1, 1}, {0, 0.99999}},
+  {{-1, 1}, {0, 0.99999}},
+  {{-1, -1},  {0, 0}},
+  {{1, -1}, {0.99999, 0}}
+};
+
+
+const GLubyte indexes[] = {
+  0, 1, 2,
+  2, 3, 0
 };
 
 static const char* vertex_shader_text =
@@ -99,10 +115,10 @@ unsigned char image[] = {
   255, 0, 255, 255
 };
 
-int main(void)
+int main(int argc, char *argv[])
 {
     GLFWwindow* window;
-    GLuint vertex_buffer, vertex_shader, fragment_shader, program;
+    GLuint vertex_buffer, index_buffer, vertex_shader, fragment_shader, program;
     GLint mvp_location, vpos_location, vcol_location;
 
     glfwSetErrorCallback(error_callback);
@@ -131,9 +147,22 @@ int main(void)
 
     // NOTE: OpenGL error checks have been omitted for brevity
 
+    //glGenBuffers(1, &vertex_buffer);
+    //glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(vertexes), vertexes, GL_STATIC_DRAW);
+     
+    // Create Buffer
     glGenBuffers(1, &vertex_buffer);
+
+    // Map GL_ARRAY_BUFFER to this buffer
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+
+    // Send the data
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexes), vertexes, GL_STATIC_DRAW);
+
+    glGenBuffers(1, &index_buffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexes), indexes, GL_STATIC_DRAW);
 
     vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL);
@@ -207,13 +236,13 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT);
 
         mat4x4_identity(m);
-        mat4x4_rotate_Z(m, m, (float) glfwGetTime());
+        //mat4x4_rotate_Z(m, m, (float) glfwGetTime());
         mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
         mat4x4_mul(mvp, p, m);
 
         glUseProgram(program);
         glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*) mvp);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
