@@ -48,4 +48,6 @@ Usage: ezview inputFile
 
 Example: ezview imput.ppm
 
-Compile with "nmake". Tested on Windows 7. Compiled using visual studio cl.exe.
+Compile with "nmake". Requires GLES2 Starter Kit
+
+Tested on Windows 7. Compiled using visual studio cl.exe.
