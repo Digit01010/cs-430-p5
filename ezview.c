@@ -40,31 +40,6 @@ void skipComments(FILE *);
 // (-1, 1)  (1, 1)
 // (-1, -1) (1, -1)
 
-/*Vertex vertexes[] = {
-  {{1, -1}, {0.99999, 0}},
-  {{1, 1},  {0.99999, 0.99999}},
-  {{-1, 1}, {0, 0.99999}},
-  {{-1, -1},  {0, 0}},
-};*/
-
-/*Vertex vertexes[] = {
-  {{1, -1}, {0.99999, 0}},
-  {{1, 1},  {0.99999, 0.99999}},
-  {{-1, 1}, {0, 0.99999}},
-  {{-1, 1}, {0, 0.99999}},
-  {{-1, -1}, {0, 0}},
-  {{1, -1}, {0.99999, 0}}
-};*/
-
-/*Vertex vertexes[] = {
-  {{1, -1}, {0, 0.99999}},
-  {{1, 1},  {0, 0}},
-  {{-1, 1}, {0.99999, 0}},
-  {{-1, 1}, {0.99999, 0}},
-  {{-1, -1},{0.99999, 0.99999}},
-  {{1, -1}, {0, 0.99999}}
-};*/
-
 Vertex vertexes[] = {
   {{-1, -1}, {0, 1}},
   {{-1, 1},  {0, 0}},
@@ -73,26 +48,6 @@ Vertex vertexes[] = {
   {{1, -1},{1, 1}},
   {{-1, -1}, {0, 1}}
 };
-
-/*Vertex vertexes[] = {
-  {{1, -1}, {1, 0}},
-  {{1, 1},  {1, 1}},
-  {{-1, 1}, {0, 1}},
-  {{-1, 1}, {0, 1}},
-  {{-1, -1},{0, 0}},
-  {{1, -1}, {1, 0}}
-};*/
-
-
-/*Vertex vertexes[] = {
-  {{1, -1}, {1, 0}},
-  {{-1, 1}, {0, 1}},
-  {{1, 1},  {1, 1}},
-
-  {{-1, 1}, {0, 1}},
-  {{1, -1}, {1, 0}},
-  {{-1, -1},{0, 0}}
-};*/
 
 
 const GLubyte indexes[] = {
@@ -266,83 +221,6 @@ void glCompileShaderOrDie(GLuint shader) {
   }
 }
 
-// 4 x 4 image..
-/*unsigned char image[] = {
-  255, 0, 0, 255,
-  255, 0, 0, 255,
-  255, 0, 0, 255,
-  255, 0, 0, 255,
-
-  0, 255, 0, 255,
-  0, 255, 0, 255,
-  0, 255, 0, 255,
-  0, 255, 0, 255,
-
-  0, 0, 255, 255,
-  0, 0, 255, 255,
-  0, 0, 255, 255,
-  0, 0, 255, 255,
-
-  255, 0, 255, 255,
-  255, 0, 255, 255,
-  255, 0, 255, 255,
-  255, 0, 255, 255
-};*/
-
-/*unsigned char image[] = {
-  255, 0, 0,
-  255, 0, 0,
-  255, 0, 0,
-  255, 255, 0,
-
-  0, 255, 0,
-  0, 255, 0,
-  255, 255, 0,
-  0, 255, 0,
-
-  0, 0, 255,
-  255, 255, 0,
-  0, 0, 255,
-  0, 0, 255,
-
-  255, 255, 0,
-  255, 0, 255,
-  255, 0, 255,
-  255, 0, 255
-};*/
-
-unsigned char image[] = {
-255, 0, 0,
-255, 0, 0,
-255, 0, 0,
-255, 0, 0,
-255, 0, 0,
-
-255, 255, 255,
-255, 255, 255,
-255, 0, 0,
-255, 255, 255,
-255, 255, 255,
-
-255, 255, 255,
-255, 255, 255,
-255, 0, 0,
-255, 255, 255,
-255, 255, 255,
-
-255, 0, 0,
-255, 255, 255,
-255, 0, 0,
-255, 255, 255,
-255, 255, 255,
-
-255, 0, 0,
-255, 0, 0,
-255, 0, 0,
-255, 255, 255,
-255, 255, 255,
-0, 255, 0
-};
 
 int main(int argc, char *argv[])
 {
@@ -380,9 +258,6 @@ int main(int argc, char *argv[])
   }
     fclose(input);
 
-    //for (int i=0; i<inHeader.width * inHeader.height;i++) {
-	//  printf("%d, %d, %d \n", buffer[i].red, buffer[i].green, buffer[i].blue);
-	//}
 
     unsigned char *raw_data = malloc(sizeof(unsigned char)*4*inHeader.width * inHeader.height);
     for (int i=0; i<inHeader.width * inHeader.height;i++) {
@@ -390,7 +265,6 @@ int main(int argc, char *argv[])
 	  raw_data[i*4+1] = buffer[i].green;
 	  raw_data[i*4+2] = buffer[i].blue;
 	  raw_data[i*4+3] = 255;
-	  //printf("%d, %d, %d \n", buffer[i].red, buffer[i].green, buffer[i].blue);
 	}
 
 
@@ -423,10 +297,6 @@ int main(int argc, char *argv[])
     glfwSwapInterval(1);
 
     // NOTE: OpenGL error checks have been omitted for brevity
-
-    //glGenBuffers(1, &vertex_buffer);
-    //glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    //glBufferData(GL_ARRAY_BUFFER, sizeof(vertexes), vertexes, GL_STATIC_DRAW);
      
     // Create Buffer
     glGenBuffers(1, &vertex_buffer);
@@ -503,8 +373,6 @@ int main(int argc, char *argv[])
     glUniform1i(tex_location, 0);
     
     mat4x4_identity(current_transform);
-    //mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
-    //mat4x4_mul(current_transform, p, current_transform);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -515,19 +383,15 @@ int main(int argc, char *argv[])
         glfwGetFramebufferSize(window, &width, &height);
         ratio = width / (float) height;
         
-		//imgratio = inHeader.width / (float) inHeader.height;
+		imgratio = inHeader.width / (float) inHeader.height;
 
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT);
 
         mat4x4_identity(mvp);
-        //mat4x4_rotate_Z(m, m, (float) glfwGetTime());
         mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
         mat4x4_mul(mvp, p, mvp);
-        //mat4x4_ortho(p, imgratio, -imgratio, 1.f, -1.f, -1.f, 1.f);
-        //mat4x4_mul(mvp, p, mvp);
         mat4x4_mul(mvp, current_transform, mvp);
-        //mat4x4_mul(mvp, p, mvp);
 
         glUseProgram(program);
         glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*) mvp);
