@@ -130,11 +130,15 @@ static void error_callback(int error, const char* description)
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+    // Control
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     if (key == GLFW_KEY_0 && action == GLFW_PRESS)
         mat4x4_identity(current_transform);
-    if (key == GLFW_KEY_E && (action == GLFW_REPEAT || action == GLFW_PRESS)) {
+    
+	
+	// Rotate
+	if (key == GLFW_KEY_E && (action == GLFW_REPEAT || action == GLFW_PRESS)) {
         mat4x4 m;
         mat4x4_identity(m);
         mat4x4_rotate_Z(m, m, (float) -2*PI/80.0);
@@ -146,6 +150,9 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         mat4x4_rotate_Z(m, m, (float) 2*PI/80.0);
         mat4x4_mul(current_transform, m, current_transform);
     }
+    
+    
+    // Pan
     if (key == GLFW_KEY_W && (action == GLFW_REPEAT || action == GLFW_PRESS)) {
         mat4x4 m;
         mat4x4_translate(m, 0.0, 0.1, 0.0);
@@ -166,6 +173,78 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         mat4x4_translate(m, 0.1, 0.0, 0.0);
         mat4x4_mul(current_transform, m, current_transform);
     }
+    
+    // Scale x
+    if (key == GLFW_KEY_R && (action == GLFW_REPEAT || action == GLFW_PRESS)) {
+        mat4x4 m;
+        mat4x4_identity(m);
+        mat4x4_scale_aniso(m, m, 1.25, 1.0, 1.0);
+        mat4x4_mul(current_transform, m, current_transform);
+    }
+    if (key == GLFW_KEY_F && (action == GLFW_REPEAT || action == GLFW_PRESS)) {
+        mat4x4 m;
+        mat4x4_identity(m);
+        mat4x4_scale_aniso(m, m, 0.8, 1.0, 1.0);
+        mat4x4_mul(current_transform, m, current_transform);
+    }
+    
+    // Scale y
+    if (key == GLFW_KEY_T && (action == GLFW_REPEAT || action == GLFW_PRESS)) {
+        mat4x4 m;
+        mat4x4_identity(m);
+        mat4x4_scale_aniso(m, m, 1.0, 1.25, 1.0);
+        mat4x4_mul(current_transform, m, current_transform);
+    }
+    if (key == GLFW_KEY_G && (action == GLFW_REPEAT || action == GLFW_PRESS)) {
+        mat4x4 m;
+        mat4x4_identity(m);
+        mat4x4_scale_aniso(m, m, 1.0, 0.8, 1.0);
+        mat4x4_mul(current_transform, m, current_transform);
+    }
+    
+    // Scale both
+    if (key == GLFW_KEY_2 && (action == GLFW_REPEAT || action == GLFW_PRESS)) {
+        mat4x4 m;
+        mat4x4_identity(m);
+        mat4x4_scale_aniso(m, m, 1.25, 1.25, 1.0);
+        mat4x4_mul(current_transform, m, current_transform);
+    }
+    if (key == GLFW_KEY_1 && (action == GLFW_REPEAT || action == GLFW_PRESS)) {
+        mat4x4 m;
+        mat4x4_identity(m);
+        mat4x4_scale_aniso(m, m, 0.8, 0.8, 1.0);
+        mat4x4_mul(current_transform, m, current_transform);
+    }
+    
+    // Shear x
+    if (key == GLFW_KEY_Y && (action == GLFW_REPEAT || action == GLFW_PRESS)) {
+        mat4x4 m;
+        mat4x4_identity(m);
+        m[1][0] = 0.1;
+        mat4x4_mul(current_transform, m, current_transform);
+    }
+    if (key == GLFW_KEY_H && (action == GLFW_REPEAT || action == GLFW_PRESS)) {
+        mat4x4 m;
+        mat4x4_identity(m);
+        m[1][0] = -0.1;
+        mat4x4_mul(current_transform, m, current_transform);
+    }
+    
+    // Shear y
+    if (key == GLFW_KEY_U && (action == GLFW_REPEAT || action == GLFW_PRESS)) {
+        mat4x4 m;
+        mat4x4_identity(m);
+        m[0][1] = 0.1;
+        mat4x4_mul(current_transform, m, current_transform);
+    }
+    if (key == GLFW_KEY_J && (action == GLFW_REPEAT || action == GLFW_PRESS)) {
+        mat4x4 m;
+        mat4x4_identity(m);
+        m[0][1] = -0.1;
+        mat4x4_mul(current_transform, m, current_transform);
+    }
+    
+    
 }
 
 void glCompileShaderOrDie(GLuint shader) {
@@ -436,18 +515,19 @@ int main(int argc, char *argv[])
         glfwGetFramebufferSize(window, &width, &height);
         ratio = width / (float) height;
         
-		imgratio = inHeader.width / (float) inHeader.height;
+		//imgratio = inHeader.width / (float) inHeader.height;
 
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        mat4x4_identity(m);
+        mat4x4_identity(mvp);
         //mat4x4_rotate_Z(m, m, (float) glfwGetTime());
-        //mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
-        //mat4x4_mul(mvp, p, m);
-        mat4x4_ortho(p, -imgratio, imgratio, -1.f, 1.f, 1.f, -1.f);
-        mat4x4_mul(mvp, p, m);
+        mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+        mat4x4_mul(mvp, p, mvp);
+        //mat4x4_ortho(p, imgratio, -imgratio, 1.f, -1.f, -1.f, 1.f);
+        //mat4x4_mul(mvp, p, mvp);
         mat4x4_mul(mvp, current_transform, mvp);
+        //mat4x4_mul(mvp, p, mvp);
 
         glUseProgram(program);
         glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*) mvp);
@@ -475,7 +555,7 @@ Header parseHeader(FILE *fh) {
   }
   
   // Parse magic number
-  fscanf(fh, "%d ", &h.magicNumber);
+  fscanf(fh, "%d ", (int *) &h.magicNumber);
   
   skipComments(fh);
   
@@ -490,7 +570,7 @@ Header parseHeader(FILE *fh) {
   skipComments(fh);
   
   // Parse maximum color value
-  fscanf(fh, "%d", &h.maxColor);
+  fscanf(fh, "%d", (int *) &h.maxColor);
   
   // Skip single whitespace character before data
   fgetc(fh);
@@ -508,7 +588,7 @@ Header parseHeader(FILE *fh) {
 void readP3(Pixel *buffer, Header h, FILE *fh) {
   // Read RGB triples
   for (int i = 0; i < h.width * h.height; i++) {
-     fscanf(fh, "%d %d %d", &buffer[i].red, &buffer[i].green, &buffer[i].blue);
+     fscanf(fh, "%d %d %d", (int *) &buffer[i].red,  (int *) &buffer[i].green, (int *) &buffer[i].blue);
   }
   if (ferror(fh) != 0) {
      fprintf(stderr, "Error: Unable to read data.");
