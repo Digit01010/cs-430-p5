@@ -42,7 +42,7 @@ KEYS:
  
  U - Increase Y shear
  
- J - Decreasy Y shear
+ J - Decrease Y shear
 
 Usage: ezview inputFile
 
