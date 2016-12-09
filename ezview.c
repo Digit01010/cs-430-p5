@@ -13,6 +13,8 @@ GLFWwindow* window;
 
 #include <assert.h>
 
+#define PI 3.1415926535
+
 typedef struct {
   float Position[2];
   float TexCoord[2];
@@ -98,6 +100,10 @@ const GLubyte indexes[] = {
   2, 3, 0
 };
 
+mat4x4 current_transform;
+
+//GLint mvp_location;
+
 static const char* vertex_shader_text =
 "uniform mat4 MVP;\n"
 "attribute vec2 TexCoordIn;\n"
@@ -126,6 +132,40 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);
+    if (key == GLFW_KEY_0 && action == GLFW_PRESS)
+        mat4x4_identity(current_transform);
+    if (key == GLFW_KEY_E && (action == GLFW_REPEAT || action == GLFW_PRESS)) {
+        mat4x4 m;
+        mat4x4_identity(m);
+        mat4x4_rotate_Z(m, m, (float) -2*PI/80.0);
+        mat4x4_mul(current_transform, m, current_transform);
+    }
+    if (key == GLFW_KEY_Q && (action == GLFW_REPEAT || action == GLFW_PRESS)) {
+        mat4x4 m;
+        mat4x4_identity(m);
+        mat4x4_rotate_Z(m, m, (float) 2*PI/80.0);
+        mat4x4_mul(current_transform, m, current_transform);
+    }
+    if (key == GLFW_KEY_W && (action == GLFW_REPEAT || action == GLFW_PRESS)) {
+        mat4x4 m;
+        mat4x4_translate(m, 0.0, 0.1, 0.0);
+        mat4x4_mul(current_transform, m, current_transform);
+    }
+    if (key == GLFW_KEY_S && (action == GLFW_REPEAT || action == GLFW_PRESS)) {
+        mat4x4 m;
+        mat4x4_translate(m, 0.0, -0.1, 0.0);
+        mat4x4_mul(current_transform, m, current_transform);
+    }
+    if (key == GLFW_KEY_A && (action == GLFW_REPEAT || action == GLFW_PRESS)) {
+        mat4x4 m;
+        mat4x4_translate(m, -0.1, 0.0, 0.0);
+        mat4x4_mul(current_transform, m, current_transform);
+    }
+    if (key == GLFW_KEY_D && (action == GLFW_REPEAT || action == GLFW_PRESS)) {
+        mat4x4 m;
+        mat4x4_translate(m, 0.1, 0.0, 0.0);
+        mat4x4_mul(current_transform, m, current_transform);
+    }
 }
 
 void glCompileShaderOrDie(GLuint shader) {
@@ -382,23 +422,32 @@ int main(int argc, char *argv[])
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texID);
     glUniform1i(tex_location, 0);
+    
+    mat4x4_identity(current_transform);
+    //mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+    //mat4x4_mul(current_transform, p, current_transform);
 
     while (!glfwWindowShouldClose(window))
     {
-        float ratio;
+        float ratio, imgratio;
         int width, height;
         mat4x4 m, p, mvp;
 
         glfwGetFramebufferSize(window, &width, &height);
         ratio = width / (float) height;
+        
+		imgratio = inHeader.width / (float) inHeader.height;
 
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT);
 
         mat4x4_identity(m);
-        mat4x4_rotate_Z(m, m, (float) glfwGetTime());
-        mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+        //mat4x4_rotate_Z(m, m, (float) glfwGetTime());
+        //mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+        //mat4x4_mul(mvp, p, m);
+        mat4x4_ortho(p, -imgratio, imgratio, -1.f, 1.f, 1.f, -1.f);
         mat4x4_mul(mvp, p, m);
+        mat4x4_mul(mvp, current_transform, mvp);
 
         glUseProgram(program);
         glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*) mvp);
